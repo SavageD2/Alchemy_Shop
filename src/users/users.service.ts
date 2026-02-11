@@ -9,9 +9,9 @@ import { InjectRepository } from '@nestjs/typeorm/dist/common/typeorm.decorators
 export class UsersService {
 
   constructor(
-    @InjectRepository(User) 
-    private userRepository: Repository<User>
-  ) {}
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) { }
 
   async create(createUserDto: CreateUserDto) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
@@ -22,7 +22,10 @@ export class UsersService {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       password: hashedPassword,
     });
-    return this.userRepository.save(newUser); 
+    return this.userRepository.save(newUser);
   }
-    
+
+  findByEmail(email: string) {
+    return this.userRepository.findOne({ where: { email } });
   }
+}
