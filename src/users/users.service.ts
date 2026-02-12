@@ -14,18 +14,24 @@ export class UsersService {
   ) { }
 
   async create(createUserDto: CreateUserDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const newUser = this.userRepository.create({
       ...createUserDto,
-      email: createUserDto.email.toLocaleLowerCase(),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      email: createUserDto.email.toLowerCase(),
       password: hashedPassword,
     });
     return this.userRepository.save(newUser);
   }
 
   findByEmail(email: string) {
-    return this.userRepository.findOne({ where: { email } });
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('user.email = :email', { email })
+      .addSelect('user.password')
+      .getOne();
+  }
+
+  findAll() {
+    return this.userRepository.find();
   }
 }

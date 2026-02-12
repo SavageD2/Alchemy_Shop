@@ -13,11 +13,12 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string): Promise<AuthenticatedUser | null> {
     const user = await this.usersService.findByEmail(email);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    if (user && await bcrypt.compare(password, user.password)) {
-      return user;
+    if (user && (await bcrypt.compare(password, user.password))) {
+      // Ne jamais retourner le password !
+      const { password: _, ...result } = user;
+      return result as AuthenticatedUser;
     }
     return null;
   }
