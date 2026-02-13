@@ -1,19 +1,31 @@
-import { Controller, Post, Get } from '@nestjs/common';
+import { Controller, Post, Get, UseGuards, Body, ForbiddenException } from '@nestjs/common';
 import { PotionService } from './potion.service';
-import { Potion } from './potion.entity';
+import { CreatePotionDto } from './dto/create-potion.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import type { AuthenticatedUser } from 'src/auth/interfaces/auth-user.interface';
 
-@Controller('potion')
+@Controller('potions')
+@UseGuards(JwtAuthGuard) // Toutes les routes nécessitent une authentification
 export class PotionController {
   constructor(private readonly potionService: PotionService) {}
 
   @Post()
-  create() {
-    // Logique de création de potion
-    return this.potionService.createPotion(new Potion());
+  async createPotion(
+    @Body() createPotionDto: CreatePotionDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    if (!user.shopId) {
+      throw new ForbiddenException('You must be assigned to a shop to create potions');
+    }
+    return this.potionService.createPotionForShop(createPotionDto, user.shopId);
   }
 
   @Get()
-  findAll() {
-    return this.potionService.findAll();
+  async getMyPotions(@CurrentUser() user: AuthenticatedUser) {
+    if (!user.shopId) {
+      return [];
+    }
+    return this.potionService.findByShop(user.shopId);
   }
 }

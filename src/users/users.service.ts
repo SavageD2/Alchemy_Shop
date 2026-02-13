@@ -16,9 +16,10 @@ export class UsersService {
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const newUser = this.userRepository.create({
-      ...createUserDto,
       email: createUserDto.email.toLowerCase(),
       password: hashedPassword,
+      role: createUserDto.role,
+      shopId: createUserDto.shopId,
     });
     return this.userRepository.save(newUser);
   }
@@ -26,12 +27,13 @@ export class UsersService {
   findByEmail(email: string) {
     return this.userRepository
       .createQueryBuilder('user')
+      .leftJoinAndSelect('user.shop', 'shop') // On joint la relation avec Shop
       .where('user.email = :email', { email })
       .addSelect('user.password')
       .getOne();
   }
 
   findAll() {
-    return this.userRepository.find();
+    return this.userRepository.find({ relations: ['shop'] });
   }
 }
