@@ -1,7 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,14 +5,15 @@ import { ShopsModule } from './shops/shops.module';
 import { PotionModule } from './potion/potion.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
-    ShopsModule,
-    PotionModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(), // ⚠️ Active le système de planification
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,8 +28,11 @@ import { AuthModule } from './auth/auth.module';
         autoLoadEntities: true,
       }),
     }),
+    ShopsModule,
+    PotionModule,
     UsersModule,
     AuthModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

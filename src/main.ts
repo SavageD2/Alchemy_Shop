@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { TrimPipe } from './common/pipes/trim.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +14,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // Rejette les requêtes avec propriétés inconnues
       transform: true, // Transforme automatiquement les types
     }),
+    new TrimPipe(), // Applique le pipe de trim globalement
   );
 
   // Activer les CORS
@@ -26,6 +28,7 @@ async function bootstrap() {
     .setTitle('Alchimia SaaS API')
     .setDescription('Gestion de stock et potions pour les alchimistes')
     .setVersion('1.0')
+    .addBearerAuth() // ⚠️ Active l'authentification Bearer dans Swagger
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -34,4 +37,4 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
 }
 
-bootstrap();
+void bootstrap();
